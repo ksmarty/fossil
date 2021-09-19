@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"deno.enable": true,
+		"deno.lint": true,
+		"deno.suggest.names": true,
+		// "deno.suggest.autoImports": true,
+		// "deno.suggest.paths": true,
+		// "deno.suggest.imports.hosts": {
+		// 	"https://deno.land": true,
+		// 	"https://cdn.skypack.dev": false,
+		// 	"https://jspm.dev": false,
+		// 	"https://esm.sh": true,
+		// 	"https://dev.jspm.io": true
+		// },
+		"deno.config": "./deno.tsconfig.json",
+		"deno.unstable": true,
+		"deno.suggest.imports.hosts": {
+			"https://e": false,
+			"https://esm": false,
+			"https://esm.": false
+		}
+	}
+}

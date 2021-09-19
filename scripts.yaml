@@ -1,0 +1,7 @@
+logger:
+    fullscreen: true
+    quiet: true
+    debug: true
+scripts:
+    start:
+        cmd: deno run -q --allow-net=0.0.0.0:8080 --allow-read=. server.tsx
