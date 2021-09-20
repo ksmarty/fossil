@@ -12,16 +12,7 @@ export default () => {
 				/>
 			</head>
 			<body>
-				<h1 className="text-3xl m-2">Fossil</h1>
-				<form
-					action="/upload"
-					method="post"
-					encType="multipart/form-data"
-				>
-					<input type="file" name="file" />
-					<br />
-					<input type="submit" value="Upload"></input>
-				</form>
+				<h1 className="text-3xl m-2">That's not a file!</h1>
 			</body>
 		</html>
 	);
