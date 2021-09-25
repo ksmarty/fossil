@@ -1,19 +1,13 @@
-// React
-// @deno-types="https://denopkg.com/soremwar/deno_types/react/v16.13.1/react.d.ts"
-import "https://esm.sh/react@16.13.1";
-// @deno-types="https://denopkg.com/soremwar/deno_types/react-dom/v16.13.1/server.d.ts"
-import ReactDOMServer from "https://esm.sh/react-dom@16.13.1/server";
+import {} from "./dep.ts";
 
 // Oak
 import { Application, Router } from "https://deno.land/x/oak@v9.0.1/mod.ts";
 
 // Pages
-import Home from "./pages/home.tsx";
-import NotFound from "./pages/not-found.tsx";
-import Upload from "./pages/upload.tsx";
-
-// Render JSX
-const render = (jsx: JSX.Element) => ReactDOMServer.renderToString(jsx);
+import render from "./pages/render.ts";
+import Home from "./pages/home.ts";
+import NotFound from "./pages/not-found.ts";
+import Upload from "./pages/upload.ts";
 
 // Instantiate Oak
 const app = new Application();
@@ -25,11 +19,11 @@ router
 	.get("/", ({ response: res }) => {
 		res.body = render(Home());
 	})
-	// Upload
+	// // Upload
 	.post("/upload", async (ctx) => {
 		ctx.response.body = render(await Upload(ctx));
 	})
-	// Static files
+	// // Static files
 	.get("/static/:id/:file", async (ctx) => {
 		try {
 			// Try to get file

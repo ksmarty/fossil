@@ -1,5 +1,3 @@
-// @deno-types="https://denopkg.com/soremwar/deno_types/react/v16.13.1/react.d.ts"
-import React from "https://esm.sh/react@16.13.1";
 import { customAlphabet } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
 import { nolookalikesSafe } from "https://esm.sh/nanoid-dictionary@5.0.0-beta.1";
 import { emptyDir } from "https://deno.land/std@0.107.0/fs/mod.ts";
@@ -37,27 +35,18 @@ export default async (
 		await Deno.remove(`${filename}`);
 	}
 
-	return (
-		<html>
-			<head>
-				<title>Fossil</title>
-				<link
-					href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
-					rel="stylesheet"
-				/>
-			</head>
-			<body>
-				<h1 className="text-3xl m-2">Successfully uploaded!</h1>
-				<p className="m-2">
-					View your file
-					<a
-						href={protocol + "//" + host + "/" + relPath}
-						className="text-purple-500 ml-1"
-					>
-						here
-					</a>
-				</p>
-			</body>
-		</html>
-	);
+	return /*html*/ `
+		<div id="Upload">
+			<h1 class="text-3xl m-2">Successfully uploaded!</h1>
+			<p class="m-2">
+				View your file
+				<a
+					href=${protocol + "//" + host + "/" + relPath}
+					class="text-purple-500 ml-1"
+				>
+					here
+				</a>
+			</p>
+		</div>
+	`;
 };
