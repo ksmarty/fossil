@@ -9,11 +9,5 @@
 		"deno.lint": true,
 		"deno.suggest.names": true,
 		"deno.unstable": true,
-		"deno.suggest.imports.hosts": {
-			"https://esm.sh": false,
-			"https://cdn.": false,
-			"https://cdn.skypack.dev": false,
-			"https://esm.": false
-		},
 	}
 }

@@ -8,6 +8,7 @@ import render from "./pages/render.ts";
 import Home from "./pages/home.ts";
 import NotFound from "./pages/not-found.ts";
 import Upload from "./pages/upload.ts";
+import Admin from "./pages/admin.ts";
 
 // Instantiate Oak
 const app = new Application();
@@ -18,6 +19,10 @@ router
 	// Home
 	.get("/", ({ response: res }) => {
 		res.body = render(Home());
+	})
+	// Admin Panel
+	.get("/admin", async ({ response: res }) => {
+		res.body = render(await Admin());
 	})
 	// // Upload
 	.post("/upload", async (ctx) => {
@@ -34,6 +39,13 @@ router
 			if (ctx.response.status === 404)
 				ctx.response.body = "Oops! That's not a file!";
 		}
+	})
+	.delete("/delete", async ({ request: req, response: res }) => {
+		const result = req.body({ type: "json" });
+		const { fileName } = await result.value;
+		Deno.remove(fileName.match(/(.*\/.*)\/.*/)[1], { recursive: true });
+		console.log(`Someone deleted the file: ${fileName}`);
+		res.body = "Successfully deleted";
 	});
 
 // Enable routes
