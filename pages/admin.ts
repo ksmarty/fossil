@@ -16,14 +16,15 @@ export default () => {
         </template>
     </div>
     <script>
-        const deleteFile = (fileName) => {
-            fetch("/delete", {
+        const deleteFile = async (fileName) => {
+            const res = await fetch("/delete/"+fileName.match(/static\\/(.*)/)[1], {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({fileName})
-            })
+                body: null
+            });
+            console.log(await res.json());
         }
     </script>
 </div>`;

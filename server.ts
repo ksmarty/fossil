@@ -40,12 +40,14 @@ router
 				ctx.response.body = "Oops! That's not a file!";
 		}
 	})
-	.delete("/delete", async ({ request: req, response: res }) => {
-		const result = req.body({ type: "json" });
-		const { fileName } = await result.value;
-		Deno.remove(fileName.match(/(.*\/.*)\/.*/)[1], { recursive: true });
-		console.log(`Someone deleted the file: ${fileName}`);
-		res.body = "Successfully deleted";
+	.delete("/delete/:id/:file", (ctx) => {
+		const { response: res } = ctx;
+		if (ctx.params.id)
+			Deno.remove(`static/${ctx.params.id}`, { recursive: true });
+		console.log(
+			`Someone deleted the file: ${ctx.params.id}/${ctx.params.file}`
+		);
+		res.body = JSON.stringify({ message: "Successfully deleted" });
 	});
 
 // Enable routes
