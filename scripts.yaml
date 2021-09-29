@@ -2,11 +2,13 @@ logger:
     fullscreen: true
     quiet: true
     debug: true
+watcher:
+    exts: ["ts"]
 scripts:
     start:
         cmd: deno run --allow-net=0.0.0.0:8080 server.ts
         watch: true
         unstable: true
         allow:
-            read: ./
-            write: static,temp
+            read: static,temp,databases
+            write: static,temp,databases

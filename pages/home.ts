@@ -12,6 +12,15 @@ export default () => {
 	}}">
 		<input type="file" name="file" x-ref="input" />
 		<br />
+		<div
+			x-data="{ exp: null, times: [ 'No Expiry', '15 min', '30 min', '1 hour', '3 hours', '6 hours', '12 hours', '1 day', '3 days', '5 days', '1 week', '2 weeks' ] }">
+			<select x-model="exp" name="exp" id="exp">
+				<template x-for="time in times" :key="time">
+					<option :value="time" x-text="time"></option>
+				</template>
+			</select>
+		</div>
+		<br />
 		<input type="submit" value="Upload"></input>
 	</form>
 </div>`;

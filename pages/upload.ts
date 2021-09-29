@@ -1,17 +1,22 @@
-import { customAlphabet } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
-import { nolookalikesSafe } from "https://esm.sh/nanoid-dictionary@5.0.0-beta.1";
-import { emptyDir } from "https://deno.land/std@0.107.0/fs/mod.ts";
-import { parseURL } from "https://esm.sh/ufo@0.7.9";
 import {
+	customAlphabet,
+	nolookalikesSafe,
+	emptyDir,
+	parseURL,
 	RouterContext,
 	RouteParams,
-} from "https://deno.land/x/oak@v9.0.1/router.ts";
+	dayjs,
+	duration,
+} from "../dep.ts";
+import { addFile } from "../utils/db.ts";
 
 export default async (
 	ctx: RouterContext<RouteParams, Record<string, number>>
 ) => {
 	// Read form data
 	const dataPromise = ctx.request.body({ type: "form-data" });
+	// Make sure temp exists
+	await emptyDir("./temp");
 	// Copy file to temp dir
 	const formDataBody = await dataPromise.value.read({
 		outPath: "./temp",
@@ -20,6 +25,31 @@ export default async (
 	const { protocol, host } = parseURL(ctx.request.url.toString());
 	/** Relative path to the file */
 	let relPath = "";
+	let delLink = "";
+
+	// Expiry
+	dayjs.extend(duration);
+	const exp = dayjs()
+		.add(
+			dayjs.duration(
+				{
+					"No Expiry": undefined,
+					"15 min": { minutes: 15 },
+					"30 min": { minutes: 30 },
+					"1 hour": { hours: 1 },
+					"3 hours": { hours: 3 },
+					"6 hours": { hours: 6 },
+					"12 hours": { hours: 12 },
+					"1 day": { days: 1 },
+					"3 days": { days: 3 },
+					"5 days": { days: 5 },
+					"1 week": { weeks: 1 },
+					"2 weeks": { weeks: 2 },
+				}[formDataBody.fields?.exp]
+			)
+		)
+		.unix();
+	// const exp = dayjs().add(1, "m").unix();
 
 	if (formDataBody.files && formDataBody.files.length > 0) {
 		const { filename, originalName } = formDataBody.files[0];
@@ -33,6 +63,10 @@ export default async (
 		await Deno.copyFile(`${filename}`, relPath);
 		// Remove temp file
 		await Deno.remove(`${filename}`);
+		// Add to fileDB
+		delLink =
+			`delete/${uid}/${originalName}?did=` +
+			addFile({ folder: uid, file: `${originalName}`, exp });
 	}
 
 	return /*html*/ `
@@ -46,6 +80,9 @@ export default async (
 				>
 					here
 				</a>
+			</p>
+			<p class="m-2">
+				Use this link to delete your file: ${protocol + "//" + host + "/" + delLink}
 			</p>
 		</div>
 	`;
