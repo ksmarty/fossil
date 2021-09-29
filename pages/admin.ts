@@ -8,14 +8,14 @@ export default async () => {
     <div x-data='{files: ${files}}'>
         <template x-for="file in files">
             <div>
-                <button @click="()=>deleteFile(file.loc, file.did)">Delete</button>
+                <button @click="()=>deleteFile(file.folder, file.name, file.did)">Delete</button>
                 <p x-text="file.name"></p>
             </div>
         </template>
     </div>
     <script>
-        const deleteFile = async (fileLoc, did) => {
-            const res = await fetch("/delete/" + fileLoc + "?did=" + did, {
+        const deleteFile = async (folder, file, did) => {
+            const res = await fetch(\`/delete/\${folder}/\${file}?did=\${did}\`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

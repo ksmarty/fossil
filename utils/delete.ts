@@ -35,5 +35,5 @@ export default async (
 export const removeFile = (folder: string) => {
 	Deno.remove(`static/${folder}`, { recursive: true });
 	delFile({ folder });
-	console.log(`Someone deleted the folder: ${folder}`);
+	console.log(`The file { ${folder} } was deleted.`);
 };
