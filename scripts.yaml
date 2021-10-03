@@ -10,5 +10,5 @@ scripts:
         watch: true
         unstable: true
         allow:
-            read: static,temp,databases
+            read: static,temp,databases,public
             write: static,temp,databases

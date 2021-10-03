@@ -1,6 +1,7 @@
 import { customAlphabet, Database, nolookalikesSafe, dayjs } from "../dep.ts";
 
 let fileDB: Database<File>;
+let authDB: Database<Auth>;
 
 interface File {
 	/** File name */
@@ -12,6 +13,21 @@ interface File {
 	/** Date object as an ISO String */
 	exp?: number;
 }
+
+export interface Auth {
+	/** Username */
+	user: string;
+	/** Hashed password */
+	pass: string;
+}
+
+/***********************************************
+ * Files Functions
+ ***********************************************/
+
+const initFiles = () => {
+	fileDB = new Database<File>("databases/file.json");
+};
 
 const getFile = async ({ folder }: { folder: string }) => {
 	return await fileDB.findOne({ folder });
@@ -27,7 +43,7 @@ const getExpiredFiles = async () => {
 	);
 };
 
-const addFile = ({
+const addFile = async ({
 	folder,
 	file,
 	exp,
@@ -37,7 +53,7 @@ const addFile = ({
 	exp?: number;
 }) => {
 	const did = customAlphabet(nolookalikesSafe, 10)();
-	fileDB.insertOne({
+	await fileDB.insertOne({
 		name: file,
 		folder,
 		did,
@@ -46,12 +62,39 @@ const addFile = ({
 	return did;
 };
 
-const delFile = ({ folder }: { folder: string }) => {
-	fileDB.deleteOne({ folder });
+const delFile = async ({ folder }: { folder: string }) => {
+	await fileDB.deleteOne({ folder });
 };
 
-const init = () => {
-	fileDB = new Database<File>("databases/file.json");
+/***********************************************
+ * Auth Functions
+ ***********************************************/
+
+const initAuth = () => {
+	authDB = new Database<Auth>("databases/auth.json");
 };
 
-export { init, addFile, getFile, getAllFiles, delFile, getExpiredFiles };
+const addUser = async ({ user, pass }: Auth) => {
+	await authDB.insertOne({ user, pass });
+};
+
+const getPass = async (user: string) => {
+	const acc = await authDB.findOne({ user });
+	return acc?.pass;
+};
+
+/***********************************************
+ * Exports
+ ***********************************************/
+
+export {
+	initFiles,
+	addFile,
+	getFile,
+	getAllFiles,
+	delFile,
+	getExpiredFiles,
+	initAuth,
+	addUser,
+	getPass,
+};

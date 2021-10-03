@@ -1,5 +1,5 @@
 export default () => {
-	return /*html*/ `<div id="Home">
+	return /*html*/ `<div id="Home" class="flex">
 	<link
 		href="https://cdn.skypack.dev/-/filepond@v4.29.1-kQ2CXVKOfykYgbgQDJ5g/dist=es2020,mode=raw/dist/filepond.min.css"
 		rel="stylesheet" />

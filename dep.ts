@@ -9,6 +9,8 @@ import {
 	Router,
 	Status,
 	helpers,
+	Response,
+	Request
 } from "https://deno.land/x/oak@v9.0.1/mod.ts";
 import {
 	RouterContext,
@@ -17,6 +19,7 @@ import {
 import { everyMinute } from "https://deno.land/x/deno_cron@v1.0.0/cron.ts";
 import dayjs from "https://cdn.skypack.dev/dayjs@1.10.7";
 import duration from "https://cdn.skypack.dev/dayjs@1.10.7/plugin/duration";
+import { hash, verify } from "https://denopkg.com/denorg/scrypt@v2.1.0/mod.ts";
 
 export {
 	walkSync,
@@ -33,5 +36,9 @@ export {
 	everyMinute,
 	dayjs,
 	duration,
+	hash,
+	verify,
+	Response,
+	Request
 };
 export type { RouterContext, RouteParams };

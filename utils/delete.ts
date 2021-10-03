@@ -10,10 +10,9 @@ export default async (
 		params: { id, file },
 	} = ctx;
 
-	// Set response status and body
-	const respond = (message: string, status?: Status) => {
-		if (status) res.status = status;
-		res.body = req.method === "GET" ? message : JSON.stringify({ message });
+	const respond = {
+		message: "",
+		status: Status.OK,
 	};
 
 	// Check if file exists
@@ -22,14 +21,29 @@ export default async (
 		const dbFile = await getFile({ folder: id });
 		if (helpers.getQuery(ctx).did === dbFile?.did) {
 			removeFile(id);
-			respond("Successfully deleted");
+			respond.message = "Successfully deleted";
 		} else {
-			respond("Deletion ID was incorrect!", Status.Unauthorized);
+			Object.assign(respond, {
+				message: "Deletion ID was incorrect!",
+				status: Status.Unauthorized,
+			});
 		}
 	} else {
-		respond("File not found!", Status.NotFound);
+		Object.assign(respond, {
+			message: "File not found!",
+			status: Status.NotFound,
+		});
 		console.log("Someone tried to delete a file that doesn't exist");
 	}
+
+	if (req.method === "DELETE") {
+		res.body = JSON.stringify(respond.message);
+		res.status = respond.status;
+	}
+
+	return /*html*/ `<div id="Login" class="text-base">
+    ${respond.message}
+</div>`;
 };
 
 export const removeFile = (folder: string) => {

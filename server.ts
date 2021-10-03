@@ -1,5 +1,5 @@
 // Dependencies
-import { Application, Router, everyMinute } from "./dep.ts";
+import { Application, Router, everyMinute, Status } from "./dep.ts";
 
 // Pages
 import render from "./pages/render.ts";
@@ -7,17 +7,20 @@ import Home from "./pages/home.ts";
 import NotFound from "./pages/not-found.ts";
 import Upload from "./pages/upload.ts";
 import Admin from "./pages/admin.ts";
+import Login from "./pages/login.ts";
 
 // Utils
 import Delete, { removeFile } from "./utils/delete.ts";
-import * as db from "./utils/db.ts";
+import { initFiles, initAuth, getExpiredFiles } from "./utils/db.ts";
+import Auth from "./utils/auth.ts";
 
 // Initialize the databases
-db.init();
+initFiles();
+initAuth();
 
 // File Expiry
 everyMinute(async () => {
-	const expFiles = await db.getExpiredFiles();
+	const expFiles = await getExpiredFiles();
 	expFiles.forEach((e) => {
 		removeFile(e.folder);
 	});
@@ -56,16 +59,31 @@ router
 	// Admin File deletion
 	.delete("/delete/:id/:file", async (ctx) => await Delete(ctx))
 	// URL file deletion
-	.get("/delete/:id/:file", async (ctx) => await Delete(ctx));
+	.get(
+		"/delete/:id/:file",
+		async (ctx) => (ctx.response.body = render(await Delete(ctx)))
+	)
+	.get("/login", ({ response: res }) => (res.body = render(Login())))
+	.post(
+		"/auth",
+		async ({ response: res, request: req }) => await Auth({ res, req })
+	);
 
 // Enable routes
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// Handle 404
-app.use(({ response: res }) => {
-	res.status = 404;
-	res.body = render(NotFound());
+// Public Files & Handle 404
+app.use(async (ctx) => {
+	// Check if the requested resource is in public. If not, return a 404.
+	try {
+		await ctx.send({
+			root: "./public",
+		});
+	} catch {
+		ctx.response.status = Status.NotFound;
+		ctx.response.body = render(NotFound());
+	}
 });
 
 console.log("Server started at http://localhost:8080");
