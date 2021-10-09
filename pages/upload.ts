@@ -29,27 +29,28 @@ export default async (
 
 	// Expiry
 	dayjs.extend(duration);
-	const exp = dayjs()
-		.add(
-			dayjs.duration(
-				{
-					"No Expiry": undefined,
-					"15 min": { minutes: 15 },
-					"30 min": { minutes: 30 },
-					"1 hour": { hours: 1 },
-					"3 hours": { hours: 3 },
-					"6 hours": { hours: 6 },
-					"12 hours": { hours: 12 },
-					"1 day": { days: 1 },
-					"3 days": { days: 3 },
-					"5 days": { days: 5 },
-					"1 week": { weeks: 1 },
-					"2 weeks": { weeks: 2 },
-				}[formDataBody.fields?.exp]
-			)
-		)
-		.unix();
-	// const exp = dayjs().add(1, "m").unix();
+	const exp =
+		formDataBody.fields?.exp !== "No Expiry"
+			? dayjs()
+					.add(
+						dayjs.duration(
+							{
+								"15 min": { minutes: 15 },
+								"30 min": { minutes: 30 },
+								"1 hour": { hours: 1 },
+								"3 hours": { hours: 3 },
+								"6 hours": { hours: 6 },
+								"12 hours": { hours: 12 },
+								"1 day": { days: 1 },
+								"3 days": { days: 3 },
+								"5 days": { days: 5 },
+								"1 week": { weeks: 1 },
+								"2 weeks": { weeks: 2 },
+							}[formDataBody.fields?.exp]
+						)
+					)
+					.unix()
+			: undefined;
 
 	if (formDataBody.files && formDataBody.files.length > 0) {
 		const { filename, originalName } = formDataBody.files[0];
@@ -63,10 +64,12 @@ export default async (
 		await Deno.copyFile(`${filename}`, relPath);
 		// Remove temp file
 		await Deno.remove(`${filename}`);
+		// Get active user
+		const uploader = await ctx.cookies.get("fossil-user");
 		// Add to fileDB
 		delLink =
 			`delete/${uid}/${originalName}?did=` +
-			addFile({ folder: uid, file: `${originalName}`, exp });
+			addFile({ folder: uid, file: `${originalName}`, exp, uploader });
 	}
 
 	return /*html*/ `

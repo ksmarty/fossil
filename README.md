@@ -12,7 +12,7 @@ Run with `deno run -q --allow-net=0.0.0.0:8080 --allow-read=. --unstable server.
 -   [x] Drag & Drop file upload
 -   [x] Delete files via secret link (enable/disable via env)
 -   [x] Admin panel for managing files
-    -   [ ] Password protection
+    -   [x] Password protection
 
 ## Resources
 

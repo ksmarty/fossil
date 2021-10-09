@@ -55,8 +55,8 @@ export default async ({
 	const body = (await dataPromise.value) as Auth;
 
 	// Extract login info
-	const user = body.user ?? "user";
-	const pass = body.pass ?? "test123";
+	const user = body.user ?? "";
+	const pass = body.pass ?? "";
 
 	const hashPass = await getPass(user);
 	// Reject if user is not found
@@ -68,7 +68,11 @@ export default async ({
 
 	if (await verify(pass, hashPass)) {
 		// Credentials matched.
-		await cookies.set("fossil-token", await issueToken(), {
+		await cookies.set("fossil-token", await issueToken(user), {
+			httpOnly: true,
+			sameSite: "strict",
+		});
+		await cookies.set("fossil-user", user, {
 			httpOnly: true,
 			sameSite: "strict",
 		});
@@ -116,12 +120,13 @@ const badLogin = (res: Response) => {
 	res.body = JSON.stringify({ message: "Invalid credentials!" });
 };
 
-const issueToken = async () => {
+const issueToken = async (user: string) => {
 	return await new SignJWT({ "urn:fossil:claim": true })
 		.setProtectedHeader({ alg: "HS512" })
 		.setIssuedAt()
 		.setIssuer("urn:fossil:issuer")
 		.setAudience("urn:fossil:audience")
+		.setSubject(JSON.stringify({ user }))
 		.setExpirationTime("2h")
 		.sign(JWK);
 };

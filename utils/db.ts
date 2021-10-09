@@ -5,13 +5,15 @@ let authDB: Database<Auth>;
 
 interface File {
 	/** File name */
-	name: string;
+	file: string;
 	/** Folder name */
 	folder: string;
 	/** Query string used to delete file */
-	did: string;
+	did?: string;
 	/** Date object as an ISO String */
 	exp?: number;
+	/** The user who uploaded the file */
+	uploader?: string;
 }
 
 export interface Auth {
@@ -43,21 +45,14 @@ const getExpiredFiles = async () => {
 	);
 };
 
-const addFile = async ({
-	folder,
-	file,
-	exp,
-}: {
-	folder: string;
-	file: string;
-	exp?: number;
-}) => {
+const addFile = async ({ folder, file, exp, uploader }: File) => {
 	const did = customAlphabet(nolookalikesSafe, 10)();
 	await fileDB.insertOne({
-		name: file,
+		file,
 		folder,
 		did,
 		exp,
+		uploader,
 	});
 	return did;
 };
