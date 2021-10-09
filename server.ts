@@ -12,7 +12,7 @@ import Login from "./pages/login.ts";
 // Utils
 import Delete, { removeFile } from "./utils/delete.ts";
 import { initFiles, initAuth, getExpiredFiles } from "./utils/db.ts";
-import Auth from "./utils/auth.ts";
+import Auth, { checkToken } from "./utils/auth.ts";
 
 // Initialize the databases
 initFiles();
@@ -37,8 +37,9 @@ router
 		res.body = render(Home());
 	})
 	// Admin Panel
-	.get("/admin", async ({ response: res }) => {
-		res.body = render(await Admin());
+	.get("/admin", async (ctx) => {
+		if (!(await checkToken(ctx))) return;
+		else ctx.response.body = render(await Admin());
 	})
 	// // Upload
 	.post("/upload", async (ctx) => {
@@ -63,11 +64,12 @@ router
 		"/delete/:id/:file",
 		async (ctx) => (ctx.response.body = render(await Delete(ctx)))
 	)
-	.get("/login", ({ response: res }) => (res.body = render(Login())))
-	.post(
-		"/auth",
-		async ({ response: res, request: req }) => await Auth({ res, req })
-	);
+	.get(
+		"/login",
+		({ response: res, request: req }) =>
+			(res.body = render(Login(req)))
+	)
+	.post("/auth", async (ctx) => await Auth(ctx));
 
 // Enable routes
 app.use(router.routes());

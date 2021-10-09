@@ -7,6 +7,7 @@ export default (content: string) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="description" content="" />
+        <link rel="shortcut icon" type="image/jpg" href="./favicon.png"/>
 
         <script defer type="module" src="https://cdn.skypack.dev/pin/twind@v0.16.16-LPGqCzM3XVHFUO0IDjyk/mode=imports,min/optimized/twind/shim.js"></script>
         <script defer type="module" src="https://cdn.skypack.dev/pin/alpinejs@v3.4.1-SvvNOvUZe3QvjHhGnTyB/mode=imports,min/unoptimized/dist/cdn.min.js"></script>
