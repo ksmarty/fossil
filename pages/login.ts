@@ -1,7 +1,6 @@
 import { Request } from "../dep.ts";
 
 export default (req: Request) => {
-	// const ref = await cookies.get("Referer");
 	const ref = /(?<==).*/.exec(String(req.url))?.[0] ?? "/";
 
 	return /*html*/ `<div id="Login" class="h-full flex" x-data="login()">
@@ -44,6 +43,7 @@ export default (req: Request) => {
         </div> -->
     </div>
 
+    <!-- Alert -->
     <div x-show="toast.show" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="translate-x-full" x-transition:leave="transition ease-in-out duration-400"
         x-transition:leave-end="translate-x-fuller"
@@ -128,10 +128,6 @@ export default (req: Request) => {
                         if (resCode === 200)
                             window.location.replace(\"${ref}\");
                     }, 3000)
-
-                    // If the user and pass are good, give a token and redirect to where the user wanted to go
-                    // Login should be called when a user tries to access a resource that is protected
-                    // Otherwise, show an error
                 }
 
             }

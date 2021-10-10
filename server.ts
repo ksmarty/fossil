@@ -6,13 +6,13 @@ import render from "./pages/render.ts";
 import Home from "./pages/home.ts";
 import NotFound from "./pages/not-found.ts";
 import Upload from "./pages/upload.ts";
-import Admin from "./pages/admin.ts";
+import Dash from "./pages/dash.ts";
 import Login from "./pages/login.ts";
 
 // Utils
 import Delete, { removeFile } from "./utils/delete.ts";
 import { initFiles, initAuth, getExpiredFiles } from "./utils/db.ts";
-import Auth, { checkToken } from "./utils/auth.ts";
+import Auth, { loggedIn } from "./utils/auth.ts";
 
 // Initialize the databases
 initFiles();
@@ -37,9 +37,9 @@ router
 		res.body = render(Home());
 	})
 	// Admin Panel
-	.get("/admin", async (ctx) => {
-		if (!(await checkToken(ctx))) return;
-		else ctx.response.body = render(await Admin());
+	.get("/dash", async (ctx) => {
+		if (!(await loggedIn(ctx))) return;
+		else ctx.response.body = render(await Dash(ctx.cookies));
 	})
 	// // Upload
 	.post("/upload", async (ctx) => {
@@ -66,8 +66,7 @@ router
 	)
 	.get(
 		"/login",
-		({ response: res, request: req }) =>
-			(res.body = render(Login(req)))
+		({ response: res, request: req }) => (res.body = render(Login(req)))
 	)
 	.post("/auth", async (ctx) => await Auth(ctx));
 

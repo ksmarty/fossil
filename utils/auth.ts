@@ -16,7 +16,7 @@ import {
 	JWSInvalid,
 	withQuery,
 } from "../dep.ts";
-import { Auth, addUser, getPass } from "./db.ts";
+import { Auth, addUser, getPass, getLevelDB } from "./db.ts";
 
 let JWK: KeyLike | Uint8Array;
 
@@ -72,10 +72,6 @@ export default async ({
 			httpOnly: true,
 			sameSite: "strict",
 		});
-		await cookies.set("fossil-user", user, {
-			httpOnly: true,
-			sameSite: "strict",
-		});
 		res.body = JSON.stringify({ message: "Logged in successfully!" });
 	} else {
 		// Password didn't match
@@ -83,7 +79,7 @@ export default async ({
 	}
 };
 
-export const checkToken = async ({
+export const loggedIn = async ({
 	request: req,
 	response: res,
 	cookies,
@@ -92,15 +88,8 @@ export const checkToken = async ({
 	response: Response;
 	cookies: Cookies;
 }) => {
-	const JWT = (await cookies.get("fossil-token")) ?? "";
-
 	try {
-		// Check token
-		await jwtVerify(JWT, JWK, {
-			issuer: "urn:fossil:issuer",
-			audience: "urn:fossil:audience",
-		});
-
+		await checkToken(cookies);
 		return true;
 	} catch (e) {
 		// Invalid token
@@ -113,6 +102,35 @@ export const checkToken = async ({
 	res.status = Status.TemporaryRedirect;
 	res.redirect(withQuery("/login", { ref: req.url.pathname.slice(1) }));
 	return false;
+};
+
+const checkToken = async (cookies: Cookies) => {
+	const JWT = (await cookies.get("fossil-token")) ?? "";
+	// Check token
+	return await jwtVerify(JWT, JWK, {
+		issuer: "urn:fossil:issuer",
+		audience: "urn:fossil:audience",
+	});
+};
+
+export const getUser = async (cookies: Cookies) => {
+	try {
+		return JSON.parse((await checkToken(cookies)).payload.sub ?? "").user as string;
+	} catch {
+		//
+	}
+	return undefined;
+};
+
+export const getLevel = async (cookies: Cookies) => {
+	try {
+		return getLevelDB(
+			JSON.parse((await checkToken(cookies)).payload.sub ?? "").user
+		);
+	} catch {
+		//
+	}
+	return -1;
 };
 
 const badLogin = (res: Response) => {
@@ -131,7 +149,7 @@ const issueToken = async (user: string) => {
 		.sign(JWK);
 };
 
-const newUser = async ({ user, pass }: Auth) => {
+const newUser = async (user: string, pass: string) => {
 	const hashPass = await hash(pass);
-	await addUser({ user, pass: hashPass });
+	await addUser({ user, pass: hashPass, level: 1 });
 };

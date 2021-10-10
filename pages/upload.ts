@@ -8,6 +8,7 @@ import {
 	dayjs,
 	duration,
 } from "../dep.ts";
+import { getUser } from "../utils/auth.ts";
 import { addFile } from "../utils/db.ts";
 
 export default async (
@@ -53,23 +54,26 @@ export default async (
 			: undefined;
 
 	if (formDataBody.files && formDataBody.files.length > 0) {
-		const { filename, originalName } = formDataBody.files[0];
+		const { filename, originalName: file } = formDataBody.files[0];
 		// Generate unique id
-		const uid = customAlphabet(nolookalikesSafe, 10)();
+		const folder = customAlphabet(nolookalikesSafe, 10)();
 		// Create new folder
-		await emptyDir(`static/${uid}`);
+		await emptyDir(`static/${folder}`);
 		/** Relative path to the file */
-		relPath = `static/${uid}/${originalName}`;
+		relPath = `static/${folder}/${file}`;
 		// Copy file from temp
 		await Deno.copyFile(`${filename}`, relPath);
 		// Remove temp file
 		await Deno.remove(`${filename}`);
-		// Get active user
-		const uploader = await ctx.cookies.get("fossil-user");
 		// Add to fileDB
 		delLink =
-			`delete/${uid}/${originalName}?did=` +
-			addFile({ folder: uid, file: `${originalName}`, exp, uploader });
+			`delete/${folder}/${file}?did=` +
+			(await addFile({
+				folder,
+				file,
+				exp,
+				uploader: await getUser(ctx.cookies),
+			}));
 	}
 
 	return /*html*/ `

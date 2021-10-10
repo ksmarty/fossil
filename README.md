@@ -10,9 +10,16 @@ Run with `deno run -q --allow-net=0.0.0.0:8080 --allow-read=. --unstable server.
 -   [x] Choose file expiry date
     -   [ ] Set default expiry
 -   [x] Drag & Drop file upload
--   [x] Delete files via secret link (enable/disable via env)
--   [x] Admin panel for managing files
+-   [x] Delete files via secret link
+-   [x] Dashboard for managing files
     -   [x] Password protection
+
+## Permission Levels
+
+0. Able to upload
+1. View/delete files you've uploaded (Default)
+2. View/delete all uploaded files
+3. Create/modify accounts
 
 ## Resources
 

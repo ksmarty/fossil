@@ -21,6 +21,8 @@ export interface Auth {
 	user: string;
 	/** Hashed password */
 	pass: string;
+	/** Permission level */
+	level?: 0 | 1 | 2 | 3;
 }
 
 /***********************************************
@@ -35,8 +37,10 @@ const getFile = async ({ folder }: { folder: string }) => {
 	return await fileDB.findOne({ folder });
 };
 
-const getAllFiles = async () => {
-	return await fileDB.findMany();
+const getAllFiles = async (uploader?: string, level = 0) => {
+	return level > 1
+		? await fileDB.findMany()
+		: await fileDB.findMany({ uploader });
 };
 
 const getExpiredFiles = async () => {
@@ -45,14 +49,11 @@ const getExpiredFiles = async () => {
 	);
 };
 
-const addFile = async ({ folder, file, exp, uploader }: File) => {
+const addFile = async (file: File) => {
 	const did = customAlphabet(nolookalikesSafe, 10)();
 	await fileDB.insertOne({
-		file,
-		folder,
+		...file,
 		did,
-		exp,
-		uploader,
 	});
 	return did;
 };
@@ -69,13 +70,18 @@ const initAuth = () => {
 	authDB = new Database<Auth>("databases/auth.json");
 };
 
-const addUser = async ({ user, pass }: Auth) => {
-	await authDB.insertOne({ user, pass });
+const addUser = async (user: Auth) => {
+	await authDB.insertOne(user);
 };
 
 const getPass = async (user: string) => {
 	const acc = await authDB.findOne({ user });
 	return acc?.pass;
+};
+
+const getLevelDB = async (user: string) => {
+	const acc = await authDB.findOne({ user });
+	return acc?.level;
 };
 
 /***********************************************
@@ -92,4 +98,5 @@ export {
 	initAuth,
 	addUser,
 	getPass,
+	getLevelDB,
 };
