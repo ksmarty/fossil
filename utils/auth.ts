@@ -16,7 +16,14 @@ import {
 	JWSInvalid,
 	withQuery,
 } from "../dep.ts";
-import { Auth, addUser, getPass, getLevelDB } from "./db.ts";
+import {
+	Auth,
+	addUser,
+	delUser as authDelUser,
+	getPass,
+	getLevelDB,
+	getUsersDB,
+} from "./db.ts";
 
 let JWK: KeyLike | Uint8Array;
 
@@ -115,22 +122,19 @@ const checkToken = async (cookies: Cookies) => {
 
 export const getUser = async (cookies: Cookies) => {
 	try {
-		return JSON.parse((await checkToken(cookies)).payload.sub ?? "").user as string;
+		return JSON.parse((await checkToken(cookies)).payload.sub ?? "")
+			.user as string;
 	} catch {
-		//
+		return undefined;
 	}
-	return undefined;
 };
 
 export const getLevel = async (cookies: Cookies) => {
-	try {
-		return getLevelDB(
-			JSON.parse((await checkToken(cookies)).payload.sub ?? "").user
-		);
-	} catch {
-		//
-	}
-	return -1;
+	return (await getLevelDB(await getUser(cookies))) ?? -1;
+};
+
+export const getUsers = async (cookies: Cookies) => {
+	return (await getLevel(cookies)) >= 3 ? await getUsersDB() : [];
 };
 
 const badLogin = (res: Response) => {
@@ -149,7 +153,9 @@ const issueToken = async (user: string) => {
 		.sign(JWK);
 };
 
-const newUser = async (user: string, pass: string) => {
+export const newUser = async ({ user, pass, level }: Auth) => {
 	const hashPass = await hash(pass);
-	await addUser({ user, pass: hashPass, level: 1 });
+	await addUser({ user, pass: hashPass, level });
 };
+
+export const delUser = async (user: Auth) => await authDelUser(user);

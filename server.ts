@@ -1,5 +1,11 @@
 // Dependencies
-import { Application, Router, everyMinute, Status } from "./dep.ts";
+import {
+	Application,
+	Router,
+	everyMinute,
+	Status,
+	getNetworkAddr,
+} from "./dep.ts";
 
 // Pages
 import render from "./pages/render.ts";
@@ -8,11 +14,17 @@ import NotFound from "./pages/not-found.ts";
 import Upload from "./pages/upload.ts";
 import Dash from "./pages/dash.ts";
 import Login from "./pages/login.ts";
+import Admin from "./pages/admin.ts";
 
 // Utils
 import Delete, { removeFile } from "./utils/delete.ts";
-import { initFiles, initAuth, getExpiredFiles } from "./utils/db.ts";
-import Auth, { loggedIn } from "./utils/auth.ts";
+import {
+	initFiles,
+	initAuth,
+	getExpiredFiles,
+	Auth as AuthInterface,
+} from "./utils/db.ts";
+import Auth, { delUser, getLevel, loggedIn, newUser } from "./utils/auth.ts";
 
 // Initialize the databases
 initFiles();
@@ -28,6 +40,7 @@ everyMinute(async () => {
 
 // Instantiate Oak
 const app = new Application();
+const port = 8080;
 
 // Create page router
 const router = new Router();
@@ -57,18 +70,68 @@ router
 				ctx.response.body = "Oops! That's not a file!";
 		}
 	})
-	// Admin File deletion
+	// Dashboard File deletion
 	.delete("/delete/:id/:file", async (ctx) => await Delete(ctx))
 	// URL file deletion
 	.get(
 		"/delete/:id/:file",
 		async (ctx) => (ctx.response.body = render(await Delete(ctx)))
 	)
+	// Login
 	.get(
 		"/login",
 		({ response: res, request: req }) => (res.body = render(Login(req)))
 	)
-	.post("/auth", async (ctx) => await Auth(ctx));
+	// Authentication POST
+	.post("/auth", async (ctx) => await Auth(ctx))
+	// Admin Panel
+	.get("/admin", async (ctx) => {
+		if (!(await loggedIn(ctx))) return;
+		else {
+			if ((await getLevel(ctx.cookies)) < 3) ctx.response.redirect("/");
+			else ctx.response.body = render(await Admin(ctx.cookies));
+		}
+	})
+	.post(
+		"/admin/addUser",
+		async ({ cookies, request: req, response: res }) => {
+			if ((await getLevel(cookies)) < 3)
+				res.body = JSON.stringify({
+					message: "You're not authorized to do that",
+				});
+			else {
+				// Get form data
+				const dataPromise = req.body({ type: "json" });
+				// Read body
+				const body = (await dataPromise.value) as AuthInterface;
+				// Add user
+				await newUser(body);
+				res.body = {
+					message: `Successfully added ${body.user}!`,
+				};
+			}
+		}
+	)
+	.post(
+		"/admin/delUser",
+		async ({ cookies, request: req, response: res }) => {
+			if ((await getLevel(cookies)) < 3)
+				res.body = JSON.stringify({
+					message: "You're not authorized to do that",
+				});
+			else {
+				// Get form data
+				const dataPromise = req.body({ type: "json" });
+				// Read body
+				const body = (await dataPromise.value) as AuthInterface;
+				// Add user
+				await delUser(body);
+				res.body = {
+					message: `Successfully removed ${body.user}!`,
+				};
+			}
+		}
+	);
 
 // Enable routes
 app.use(router.routes());
@@ -87,7 +150,9 @@ app.use(async (ctx) => {
 	}
 });
 
-console.log("Server started at http://localhost:8080");
+console.log(
+	`Server started at http://localhost:${port} & http://${await getNetworkAddr()}:${port}`
+);
 
 // Start server
-await app.listen({ port: 8080 });
+await app.listen({ port });

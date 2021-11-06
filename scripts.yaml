@@ -12,3 +12,4 @@ scripts:
         allow:
             read: static,temp,databases,public,private
             write: static,temp,databases,private
+            run: ifconfig,ipconfig

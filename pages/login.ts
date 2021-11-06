@@ -127,7 +127,7 @@ export default (req: Request) => {
                         this.toast.show = false;
                         if (resCode === 200)
                             window.location.replace(\"${ref}\");
-                    }, 3000)
+                    }, 1500)
                 }
 
             }

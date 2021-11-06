@@ -8,7 +8,7 @@ export default () => {
 	<h1 class="text-3xl m-2">Fossil</h1>
 
 	<form action="/upload" method="post" enctype="multipart/form-data" x-data="{init(){
-		FilePond.create($refs.input, {storeAsFile: true})
+		FilePond.create($refs.input, {storeAsFile: true, credits: false})
 	}}">
 		<input type="file" name="file" x-ref="input" />
 		<br />

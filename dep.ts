@@ -8,6 +8,7 @@ import {
 	exists,
 	emptyDir,
 } from "https://deno.land/std@0.110.0/fs/mod.ts";
+import { getNetworkAddr } from "https://deno.land/x/local_ip@0.0.3/mod.ts";
 
 // NanoID
 import { customAlphabet } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
@@ -73,6 +74,7 @@ export {
 	JWSInvalid,
 	withQuery,
 	getQuery,
+	getNetworkAddr,
 };
 
 export type { RouterContext, RouteParams, KeyLike };

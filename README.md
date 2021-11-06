@@ -4,6 +4,8 @@ A self-hosted static file server for Docker built with Deno.
 
 Run with `deno run -q --allow-net=0.0.0.0:8080 --allow-read=. --unstable server.tsx`
 
+If [denon](https://github.com/denosaurs/denon) is installed, run `denon start`
+
 ## Features
 
 -   [x] Statically serve files

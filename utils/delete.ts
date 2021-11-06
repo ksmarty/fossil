@@ -1,4 +1,5 @@
 import { RouterContext, RouteParams, exists, Status, helpers } from "../dep.ts";
+import { getUser } from "./auth.ts";
 import { getFile, delFile } from "./db.ts";
 
 export default async (
@@ -10,7 +11,13 @@ export default async (
 		params: { id, file },
 	} = ctx;
 
-	const respond = {
+	if (req.method !== "GET" && !(await getUser(ctx.cookies))) {
+		res.body = JSON.stringify("You are not looged in!");
+		res.status = Status.Unauthorized;
+		return "";
+	}
+
+	let respond = {
 		message: "",
 		status: Status.OK,
 	};
@@ -23,16 +30,16 @@ export default async (
 			removeFile(id);
 			respond.message = "Successfully deleted";
 		} else {
-			Object.assign(respond, {
+			respond = {
 				message: "Deletion ID was incorrect!",
 				status: Status.Unauthorized,
-			});
+			};
 		}
 	} else {
-		Object.assign(respond, {
+		respond = {
 			message: "File not found!",
 			status: Status.NotFound,
-		});
+		};
 		console.log("Someone tried to delete a file that doesn't exist");
 	}
 

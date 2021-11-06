@@ -22,7 +22,7 @@ export interface Auth {
 	/** Hashed password */
 	pass: string;
 	/** Permission level */
-	level?: 0 | 1 | 2 | 3;
+	level: 0 | 1 | 2 | 3;
 }
 
 /***********************************************
@@ -38,6 +38,7 @@ const getFile = async ({ folder }: { folder: string }) => {
 };
 
 const getAllFiles = async (uploader?: string, level = 0) => {
+	if (level < 0) return;
 	return level > 1
 		? await fileDB.findMany()
 		: await fileDB.findMany({ uploader });
@@ -74,14 +75,22 @@ const addUser = async (user: Auth) => {
 	await authDB.insertOne(user);
 };
 
+const delUser = async (user: Auth) => {
+	console.log(user);
+	await authDB.deleteOne(user);
+};
+
 const getPass = async (user: string) => {
 	const acc = await authDB.findOne({ user });
 	return acc?.pass;
 };
 
-const getLevelDB = async (user: string) => {
-	const acc = await authDB.findOne({ user });
-	return acc?.level;
+const getLevelDB = async (user?: string) => {
+	return (await authDB.findOne({ user }))?.level ?? -1;
+};
+
+const getUsersDB = async () => {
+	return await authDB.findMany();
 };
 
 /***********************************************
@@ -97,6 +106,8 @@ export {
 	getExpiredFiles,
 	initAuth,
 	addUser,
+	delUser,
 	getPass,
 	getLevelDB,
+	getUsersDB,
 };
